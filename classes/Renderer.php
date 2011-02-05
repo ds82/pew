@@ -28,8 +28,10 @@ class Renderer {
 		if ($this->getTemplate() == null)
 			$this->setTemplate($this->config->controllerNamespace . '/' . $__class . '/' . 'tpl.' . $__method . '.php');
       
-		// make all values from bag locally available
+		// make all values from bag locally available ...
 		extract($this->output->getAll());
+		// ... and the injector
+		$__injector = $this->injector;
 
 		// first off all, check if a template file exists and if it exists catch the content
 		if (is_file($this->getTemplate())) {
@@ -60,11 +62,10 @@ class Renderer {
 				echo $__content;
 			break;
 			case 'json':
-				
+				echo json_encode($this->output->getAll());
 			break;
 			
 		}		
-		
 	}
 	
 	public function setTemplate($tpl) {
