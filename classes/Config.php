@@ -10,6 +10,9 @@ class Config {
 	
 	public function __construct() {}
 	
+	// common
+	public $theme = 'standard';
+	
 	// dispatching
 	public $controllerNamespace = 'app';
 	public $urlFormat = '(?P<class>\w+)\.(?P<method>\w+)\.(?P<render>\w+)';

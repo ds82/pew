@@ -7,6 +7,7 @@ chdir('../');
 
 set_include_path(get_include_path()
 	. PATH_SEPARATOR . dirname( __FILE__ ) . '/classes'
+	. PATH_SEPARATOR . getcwd() . '/webroot'
 );
 
 
@@ -29,7 +30,10 @@ spl_autoload_register(function ($class) {
 
 // #2# load the dependency injector and bind some interfaces/classes/singeltons
 $injector = new pew\Injector();
+// set singletons
 $injector->bind('pew\Config', 'pew\Config', true);
+$injector->bind('pew\Output', 'pew\Output', true);
+$injector->bind('pew\Renderer', 'pew\Renderer', true);
 $injector->bind('pew\Context', 'pew\Context', true);
 
 
@@ -40,5 +44,9 @@ if (is_file('config/Config.php'))
 // #4# load and run the dispatcher
 $dispatcher = $injector->getInstance('pew\Dispatcher');
 $dispatcher->run();
+
+// #5# give the renderer the possibility to make some output
+$renderer = $injector->getInstance('pew\Renderer');
+$renderer->run($dispatcher->getClass(), $dispatcher->getMethod(), $dispatcher->getRender());
 
 ?>

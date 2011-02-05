@@ -18,6 +18,7 @@ class Dispatcher {
 	private $uri;
    
 	private $class;
+	private $fqClassName;
 	private $method;
 	private $render;
 
@@ -42,13 +43,13 @@ class Dispatcher {
 	      
 			// set values
 			$this->class = $m['class'];
+			$this->fqClassName = $this->config->controllerNamespace . '\\' . $this->class . '\\' . $this->class;
 			$this->method = $m['method'];
 			$this->render = $m['render'];
 	 	
-			$clazz = $this->config->controllerNamespace . '\\' . $this->class;
-			if (class_exists($clazz, true)) {
+			if (class_exists($this->fqClassName, true)) {
 				
-				$instance = $this->injector->getInstance($clazz);
+				$instance = $this->injector->getInstance($this->fqClassName);
 
 				if (method_exists($instance, $this->method)) {
 				
@@ -82,12 +83,19 @@ class Dispatcher {
 	 */
 	public function error() {
 	
-		echo '<br />dispatcher->error()';
+		echo 'TODO: dispatcher->error()<br />';
 	}
 
+
+	public function isAjaxCall() {
+		return (isset($_SERVER['HTTP_X_REQUESTED_WITH']) AND ($_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest'));
+	}
    
 	public function getClass() {
 		return $this->class;
+	}
+	public function getFqClassName() {
+		return $this->fqClassName;
 	}
 	public function getMethod() {
 		return $this->method;
