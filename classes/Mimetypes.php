@@ -1,7 +1,7 @@
 <?php
 namespace pew;
 
-class Mimetypes extends PewObj {
+class Mimetypes {
 
 	private static $data = array(
 		'css'	=> array(
