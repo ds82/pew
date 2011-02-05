@@ -11,9 +11,10 @@ class Config {
 	public function __construct() {}
 	
 	// dispatching
-	public $controllerPath = 'app';
-	public $urlFormat = '(?P<module>\w+)\.(?P<action>\w+)\.(?P<extension>\w+)';
+	public $controllerNamespace = 'app';
+	public $urlFormat = '(?P<class>\w+)\.(?P<method>\w+)\.(?P<render>\w+)';
 	public $validExtensions = array('html', 'tpl', 'json');
+	public $defaultExtension = 'html';
 	
 	
 }
