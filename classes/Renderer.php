@@ -14,6 +14,10 @@ class Renderer {
 
 	private $output;
    private $template = null;
+   
+	private $class;
+	private $method;
+	private $format;
 
 	public function __construct(Output $output, Config $config, Injector $injector) {
 
@@ -22,11 +26,18 @@ class Renderer {
 		$this->injector = $injector;
 	}
 	
-	public function run($__class, $__method, $__format) {
+	public function prepare($class, $method, $format) {
+		
+		$this->class = $class;
+		$this->method = $method;
+		$this->format = $format;
+	}
+	
+	public function run() {
 
 		// if not template was set, set to default template for this call
 		if ($this->getTemplate() == null)
-			$this->setTemplate($this->config->controllerNamespace . '/' . $__class . '/' . 'tpl.' . $__method . '.php');
+			$this->setTemplate($this->config->controllerNamespace . '/' . $this->class . '/' . 'tpl.' . $this->method . '.php');
       
 		// make all values from bag locally available ...
 		extract($this->output->getAll());
@@ -45,10 +56,10 @@ class Renderer {
 			
 				$__content = ob_get_clean();
 			}
-		} else echo 'template file not found';
+		} else $this->error('template file not found. expected template: ' . $this->getTemplate());
 
 		// now make the output according to the choosen format
-		switch ($__format) {
+		switch ($this->format) {
 			
 			default:
 			case 'html':
@@ -75,7 +86,12 @@ class Renderer {
 	public function getTemplate() {
 		return $this->template;
 	}
-	
 
+	// TODO
+   public function error($msg = "") {
+	
+		if ($this->config->displayErrors)
+			echo 'TODO: renderer->error();<br />';
+	}
 }
 ?>

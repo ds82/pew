@@ -7,6 +7,36 @@ namespace pew;
  * @author Dennis Sänger
  */
 class Access {
+
+	private $config;
+	private $db;
+
+	public function __construct(Config $config, ezSQL $db) {
+
+		$this->config = $config;
+		$this->db = $db;
+	}
+
+	public function checkUser() {
+		
+		$checksum = $_SESSION['pewAccessChecksum'];
+		
+	}
+
+
+   public function prepare() {
+	
+	
+	}
+	
+
+	public function run() {
+		
+		
+	}
+	
+
+
 	
 }
 

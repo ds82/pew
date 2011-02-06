@@ -37,9 +37,19 @@ class Dispatcher {
 	public function run() {
 		
 		$requestedFile = substr($this->uri, strrpos($this->uri, '/')+1);
-		$validURL = preg_match('/'.$this->config->urlFormat.'/', $requestedFile, $m);
 
-		if ($validURL AND $this->check($m)) {
+      // if the requestedFile is empty, lets set the defaultValues and assume a validURL
+      if ($requestedFile == "") {
+
+			$m['class'] = $this->config->defaultClass;
+			$m['method'] = $this->config->defaultMethod;
+			$m['render'] = $this->config->defaultExtension;
+	      $validURL = true;
+	
+		} else $validURL = preg_match('/'.$this->config->urlFormat.'/', $requestedFile, $m);
+
+
+		if ($validURL AND $this->check(&$m)) {
 	      
 			// set values
 			$this->class = $m['class'];
@@ -47,7 +57,7 @@ class Dispatcher {
 			$this->method = $m['method'];
 			$this->render = $m['render'];
 	 	
-			if (class_exists($this->fqClassName, true)) {
+			if (class_exists($this->fqClassName, false)) {
 				
 				$instance = $this->injector->getInstance($this->fqClassName);
 
@@ -83,7 +93,8 @@ class Dispatcher {
 	 */
 	public function error() {
 	
-		echo 'TODO: dispatcher->error()<br />';
+		if ($this->config->displayErrors)
+			echo 'TODO: dispatcher->error()<br />';
 	}
 
 
@@ -107,6 +118,7 @@ class Dispatcher {
 
 	private function check($v) {
 	
+		// if one of these values is incorrect lets set the default values
 		if (strlen($v['class']) < 1 OR strlen($v['method']) < 1 OR strlen($v['render']) < 1) return false;
 		return true;
 	}

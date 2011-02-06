@@ -2,14 +2,20 @@
 // this file fires up pew
 // #0# prepare and set the include path
 
-// change to root app directory
-chdir('../');
+// change to root app directory if we are in webroot/
+if (basename(getcwd()) == 'webroot') chdir('../');
 
 set_include_path(get_include_path()
 	. PATH_SEPARATOR . dirname( __FILE__ ) . '/classes'
 	. PATH_SEPARATOR . getcwd() . '/webroot'
 );
 
+// is there a lib folder? if though, add to include path
+if (is_dir('lib')) {
+	set_include_path(get_include_path()
+		. PATH_SEPARATOR . getcwd() . '/lib'
+	);
+}
 
 // #1# register an autoloader which is capable to load pew classes
 spl_autoload_register(function ($class) {
@@ -20,33 +26,37 @@ spl_autoload_register(function ($class) {
 
 	if (!ereg('.php', $class)) $file = str_replace('\\', '/', $class). '.php';
 
-	if (!require_once($file)) {
-		// echo '<pre>';
-		// print_r(debug_backtrace());
-		// echo '</pre>';
-		throw new \Exception('required File not found: ' .  $file);
-	}
+	require_once($file);
 });
 
 // #2# load the dependency injector and bind some interfaces/classes/singeltons
 $injector = new pew\Injector();
-// set singletons
+
+
+// #3# load the setup
 $injector->bind('pew\Config', 'pew\Config', true);
-$injector->bind('pew\Output', 'pew\Output', true);
-$injector->bind('pew\Renderer', 'pew\Renderer', true);
-$injector->bind('pew\Context', 'pew\Context', true);
-
-
-// #3# if a custom config class exists, bind it to pew/Config
 if (is_file('config/Config.php')) 
 	$injector->bind('pew\Config', 'config\Config');
+if (is_file('config/Setup.php')) 
+	$injector->bind('pew\Setup', 'config\Setup');
 
-// #4# load and run the dispatcher
+$setup = $injector->getInstance('pew\Setup');
+
+// #4# load autorun classes
+$config = $injector->getInstance('pew\Config');
+if (is_array($config->autoloadClasses)) 
+	foreach($config->autoloadClasses AS $clazz) {
+		$injector->getInstance($clazz);
+	}
+
+// #5# load and run the dispatcher
 $dispatcher = $injector->getInstance('pew\Dispatcher');
 $dispatcher->run();
 
-// #5# give the renderer the possibility to make some output
+// #6# give the renderer the possibility to make some output
 $renderer = $injector->getInstance('pew\Renderer');
-$renderer->run($dispatcher->getClass(), $dispatcher->getMethod(), $dispatcher->getRender());
+$renderer->prepare($dispatcher->getClass(), $dispatcher->getMethod(), $dispatcher->getRender());
+// call this when you are rdy
+// $renderer->run();
 
 ?>
