@@ -13,6 +13,7 @@ class Renderer {
 	private $injector;
 
 	private $output;
+	private $theme = null;
    private $template = null;
    
 	private $class;
@@ -39,6 +40,10 @@ class Renderer {
 		if ($this->getTemplate() == null)
 			$this->setTemplate($this->config->controllerNamespace . '/' . $this->class . '/' . 'tpl.' . $this->method . '.php');
       
+		// check theme
+		if ($this->theme == null)
+			$this->theme = 'themes\\' . $this->config->theme . '\\Layout';
+
 		// make all values from bag locally available ...
 		extract($this->output->getAll());
 		// ... and the injector
@@ -63,8 +68,7 @@ class Renderer {
 			
 			default:
 			case 'html':
-				$clazz = 'themes\\' . $this->config->theme . '\\Layout';
-				$layout = $this->injector->getInstance($clazz);
+				$layout = $this->injector->getInstance($this->theme);
 			   $layout->header();
 				echo $__content;
 				$layout->footer();
@@ -82,10 +86,18 @@ class Renderer {
 	public function setTemplate($tpl) {
 		$this->template = $tpl;
 	}
-	
 	public function getTemplate() {
 		return $this->template;
 	}
+
+	public function setTheme($t) {
+		if (!ereg('\\', $t)) $t = 'themes\\' . $t . '\\Layout';
+		$this->theme = $t;
+	}
+	public function getTheme() {
+		return $this->theme;
+	}
+
 
 	// TODO
    public function error($msg = "") {

@@ -17,6 +17,8 @@ class Dispatcher {
 	private $host;
 	private $uri;
    
+	private $webrootUrl;
+
 	private $class;
 	private $fqClassName;
 	private $method;
@@ -31,6 +33,15 @@ class Dispatcher {
 		
 		$this->host = $_SERVER['HTTP_HOST'];
 		$this->uri = $_SERVER['REQUEST_URI'];
+		
+		$mark = strrpos($this->uri, '?');
+		if ($mark != false) $cleanUrl = $this->host . substr($this->uri, 0, $mark);
+		else $cleanUrl = $this->host . $this->uri;
+
+		// if (preg_match('/.*webroot.*/', $cleanUrl) == 1) echo 1;
+		// else echo 0;	
+		
+		$this->webrootUrl = $cleanUrl;
 	}
    
 	// try to find the right module and call the method
@@ -113,6 +124,9 @@ class Dispatcher {
 	}
 	public function getRender() {
 		return $this->render;
+	}
+	public function getWebrootUrl() {
+		return $this->webrootUrl;
 	}
 
 
