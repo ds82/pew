@@ -1,7 +1,7 @@
 <?php
-require_once('_entity.php');
-require_once('_iFormLayout.php');
-abstract class _formEntity extends _entity implements _iFormLayout {
+namespace pew\form;
+
+abstract class FormEntity extends AbstractFormLayout {
 
 	protected $isNewEntity = false;
 
@@ -21,7 +21,7 @@ abstract class _formEntity extends _entity implements _iFormLayout {
 
 		// debug
 		if (is_array($this->validationResult[$field])) $res = implode(', ', $this->validationResult[$field]);
-		Registry::getInstance()->log(get_class($this).'->getFormError('.$field.') called. Result is: '.$res);
+		// Registry::getInstance()->log(get_class($this).'->getFormError('.$field.') called. Result is: '.$res);
 
 		return $this->validationResult[$field];
 	}
@@ -42,7 +42,9 @@ abstract class _formEntity extends _entity implements _iFormLayout {
 
 				// TODO FIXME as soon as using php >= 5.3.0
 				// php 5.3
-				$valid = $v::validate($data[$f->field()], $data[$f->field()], true, $msg);
+				$v = 'pew\validator\\'.$v;	// namespace fix
+				//$valid = $v::validate($data[$f->field()], $data[$f->field()], true, $msg);
+				$valid = true;
 				// php 5.2
 				//$valid = call_user_func($v.'::validate', $data[$f->field()], &$data[$f->field()], true, &$msg);
 
@@ -78,6 +80,7 @@ abstract class _formEntity extends _entity implements _iFormLayout {
 	}
 
 	public function getFormGroups() {
+		
 		if ($this->hasFormGroups) return array_keys($this->formFields);
 		else return array(0 => null);
 	}

@@ -1,9 +1,9 @@
 <?php
-require_once('')
+//require_once('')
 
 class form extends _widget {
 
-	public function render() {
+	public function render($model = null) {
 		
 	}
 

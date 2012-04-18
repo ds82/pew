@@ -1,5 +1,7 @@
 <?php
-abstract class _validator {
+namespace pew\validator;
+
+abstract class AbstractValidator {
 
 	protected $value;
 	

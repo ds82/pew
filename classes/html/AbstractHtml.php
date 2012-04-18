@@ -2,7 +2,7 @@
 namespace pew\html;
 use pew;
 
-abstract class AbstractHtml extends pew\AbstractEntity {
+abstract class AbstractHtml {
 
 	protected function _parseClass($v) {
 
@@ -39,15 +39,24 @@ abstract class AbstractHtml extends pew\AbstractEntity {
 		$r = '';
 		if (array_key_exists('class', $opt)) $r .= $this->_parseClass($opt['class']);
 		if (array_key_exists('id', $opt)) $r .= $this->_parseId($opt['id']);
-		// TODO seb: is a _parseAlt method needed?
-		if (array_key_exists('alt', $opt)) $r .= ' alt="'.$opt['alt'].'"';
-		if (array_key_exists('style', $opt)) $r .= ' style="'.$opt['style'].'"';
-		if (array_key_exists('title', $opt)) $r .= ' title="'.$opt['title'].'"';
 
+        if (array_key_exists('alt', $opt)) $r .= ' alt="'.$opt['alt'].'"';
+
+        if (array_key_exists('style', $opt)) $r .= ' style="'.$opt['style'].'"';
+		if (array_key_exists('title', $opt)) $r .= ' title="'.$opt['title'].'"';
+		
+		if (array_key_exists('width', $opt)) $r .= ' width="'.$opt['width'].'"';
+		if (array_key_exists('height', $opt)) $r .= ' height="'.$opt['height'].'"';
+		
 		return $r;
 
    }
-   
+
+    protected function bool2String($bool) {
+        if ($bool == true) return 'true';
+        else return 'false';
+    }
+
 	protected function checkPath($path) {
 	
 		if ('/' != substr($path, -1)) $path .= '/';

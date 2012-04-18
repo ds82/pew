@@ -12,7 +12,7 @@ class Config {
 	
 	// common
 	public $theme = 'standard';
-	public $version = 'alpha1';
+	public $version = '0.2.1';
 
 	// database example configuration
 	/*
@@ -28,6 +28,7 @@ class Config {
 	
 	// dispatching
 	public $controllerNamespace = 'app';
+	// TODO the dispatcher currently just works with this format!
 	public $urlFormat = '(?P<class>\w+)\.(?P<method>\w+)\.(?P<render>\w+)';
 	public $validExtensions = array('html', 'tpl', 'json');
 	

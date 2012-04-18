@@ -19,6 +19,13 @@ class Output {
 		$this->bag[$key] = $value;
 	}
 
+    public function add($key, $value, $unique = TRUE) {
+        if (!is_array($this->bag[$key]))
+            $this->bag[$key] = array();
+        $this->bag[$key][] = $value;
+        if ($unique === TRUE) $this->bag[$key] = array_unique($this->bag[$key]);
+    }
+
 	public function getAll() {
 		return $this->bag;
 	}

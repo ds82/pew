@@ -1,6 +1,7 @@
 <?php
+namespace pew\form;
 
-abstract class _formLayout extends _pewObj {
+abstract class FormLayout {
 	
 	private $rootWidget;
 	private $model;

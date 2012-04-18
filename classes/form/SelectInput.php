@@ -1,12 +1,17 @@
 <?php
-require_once('form/_formInput.php');
-class selectInput extends _formInput {
+namespace pew\form;
+
+class SelectInput extends AbstractFormInput {
    
 	private $options = null;
 
-   function __construct($a1, $a2, $opts, $options = null) {
-	
-		parent::__construct($a1, $a2, $opts);
+	public function __construct() {
+		
+	}
+
+   public function prepare($a1, $a2, $opts, $options = null) {
+
+		parent::prepare($a1, $a2, $opts, $options);
 		$this->options = $options;
 	}
    
@@ -25,13 +30,15 @@ class selectInput extends _formInput {
 		} else if ($this->options == null OR count($this->options) == 0) {
 
 			$method = 'get'.ucfirst($this->field()).'Options';
-			if ( ! method_exists($this->model, $method)) throw new Exception(get_class($this->model).' has no method '.$method.'()');
+			
+			if ( ! method_exists($this->model, $method)) throw new \Exception(get_class($this->model).' has no method '.$method.'()');
 			$this->options = $this->model->{$method}();
-		
 		}
+
+
 		// either way, now we need an options array
 		if ( ! is_array($this->options)) throw new Exception('selectInput['.$this->field().', '.$this->value().']: options array is not set!');
-		
+
 		// cache value and name
 		$value = $this->value();
 		$name = $this->name();

@@ -16,19 +16,25 @@ class ToolbarItem extends widgets\AbstractWidget {
 	protected $css = array();
 	protected $href = array();
 	protected $visibility = "";
+    protected $noParameter = false;
 	
-	public function __construct($name, $visibility, $options = array()) {
+	public function __construct() {
+		// parent::__construct($name, null, null, null, $options);
 		
-		parent::__construct($name, null, null, null, $options);
+	}
+
+	public function setOptions($name, $visibility, $options = array()) {
 		
 		$this->name = $name;
 		$this->visibility = $visibility;
 		$this->href = isset($options['href']) ? $options['href'] : '#'.$name;
 		
-		$this->css = isset($options['css']) ? $options['css'] : '';
+		$this->css = isset($options['css']) ? $options['css'] : array();
 		!is_array($this->css) && $this->css = array($this->css);
 		
 		$this->title = isset($options['title']) ? $options['title'] : $name;
+
+        if ($options['noParameter'] == true) $this->noParameter = true;
 	}
 
 	public function setVisibility($v) {
@@ -44,8 +50,12 @@ class ToolbarItem extends widgets\AbstractWidget {
 			array_merge($this->DEFAULT_CSS, array($this->name, $this->visibility), $this->css)
 		));
 	}
-	
-	public function render() {
+
+    private function boolToString($bool) {
+
+    }
+
+	public function render($model = null) {
 		
 		// each item needs exactly one class of {$this->cssModifier}
 		if ( $this->visibility == "" OR !in_array($this->visibility, self::$CSS_MODIFIER))
@@ -54,7 +64,7 @@ class ToolbarItem extends widgets\AbstractWidget {
 		/**
 		 * build href
 	     * either href is just a string, so just print it
-		 * but if href is an array, we assume this format: array('action', 'controller', 'localtion')
+		 * but if href is an array, we assume this format: array('action', 'controller', 'location')
 		 * e.g.: ('edit','person','remote') OR ('list','jobs','local')
 		 */
 		if (is_array($this->href) AND count($this->href) > 0) {
@@ -64,7 +74,7 @@ class ToolbarItem extends widgets\AbstractWidget {
 			$href = substr($href, 0, -1);
    		} else $href = $this->href;
 		
-   		echo '<li><a href="'.$href.'" class="'.$this->getCssString().'" title="'.$this->title.'"></a></li>';
+   		echo '<li><a href="'.$href.'" data-no-parameter="'.$this->bool2String($this->noParameter).'" class="'.$this->getCssString().'" title="'.$this->title.'"></a></li>';
 	}
 	
 	public function save() {}

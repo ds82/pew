@@ -1,7 +1,7 @@
 <?php
-require_once('_entity.php');
-require_once('html.php');
-abstract class _formInput extends _entity {
+namespace pew\form;
+
+abstract class AbstractFormInput {
 
 	protected $form;
 	protected $model;
@@ -13,8 +13,12 @@ abstract class _formInput extends _entity {
 	protected $label = "";
 	
 	protected $autoTranslate = true;
-	
-	function __construct($field, $validator = null, $opts = array()) {
+
+	function __construct() {
+		
+	}
+
+	function prepare($field, $validator = null, $opts = array()) {
    
 		$this->field = $field;
 		$this->validator = $validator;
@@ -34,9 +38,8 @@ abstract class _formInput extends _entity {
 
 	public function setModel($f, $m) {
 		
-		if (! ($f instanceof form OR $f == null)) throw new Exception(get_class($this).': no valid form object given');
+		//if (! ($f instanceof form OR $f == null)) throw new Exception(get_class($this).': no valid form object given');
 		$this->form = $f;
-		
 		$this->model = $m;
 	}
 	public function getModel() {
@@ -60,17 +63,21 @@ abstract class _formInput extends _entity {
 		
 		if ($this->opts['callback']) {
 
-      	if (method_exists($this->model, $this->opts['callback']))
-				return $this->model->{$this->opts['callback']}($this->opts['cbParameter']);
+			if (method_exists($this->model, $this->opts['callback'])) {
+				$res = $this->model->{$this->opts['callback']}($this->opts['cbParameter']);
+				//echo $this->opts['callback'].':'.$this->opts['cbParameter'].":".$res."<br />";
+				return $res;
+			}
+				
 
 		} else {
 			$method = 'get'.ucfirst($this->field);
-			if ( ! method_exists($this->model, $method)) throw new Exception(get_class($this->model).' has no method '.$method.'. Can`t fetch form-value');
+
+			if ( ! method_exists($this->model, $method)) throw new \Exception(get_class($this->model).' has no method '.$method.'. Can`t fetch form-value');
 			return $this->model->{$method}();
 	  }
 	}
 	public function field() {
-		
 		return $this->field;
 	}
    public function setField($f) {
@@ -115,7 +122,7 @@ abstract class _formInput extends _entity {
 
    public function getFormError() {
 
-		Registry::getInstance()->log(get_class($this).'->getFormError() '.$this->model->getFormError($this->field()));
+		// Registry::getInstance()->log(get_class($this).'->getFormError() '.$this->model->getFormError($this->field()));
 		return $this->model->getFormError($this->field());
 	}
 	public function renderErrorMessage() {

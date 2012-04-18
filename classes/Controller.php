@@ -8,6 +8,5 @@ namespace pew;
 class Controller {
 	
 	
-	
 }
 ?>

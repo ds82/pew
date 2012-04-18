@@ -1,17 +1,21 @@
 <?php
-namespace pew\Html;
+namespace pew\html;
+use pew;
+
 class Html extends AbstractHtml {
 
 	protected $css = array();
 	protected $js = array();
 
 	public static $obj = null;
+	
+	private $context;
+	private $dispatcher;
 
-	function __construct() {
+	function __construct(pew\Context $context, pew\Dispatcher $dispatcher) {
 
-	}
-	function __destruct() {
-
+		$this->context = $context;
+		$this->dispatcher = $dispatcher;
 	}
 
 	// @todo implement path handling
@@ -49,12 +53,19 @@ class Html extends AbstractHtml {
 		echo '<script type="text/javascript" src="'.$this->checkPath($path).$file.'"></script><!-- '.$name.' -->
 ';
 	}
+
+    public function addInlineJavaScript($string) {
+        echo '<script type="text/javascript"><!-- '.$string.' //--></script>';
+    }
+
 	// @todo fix path handling
 	public function getJsOutput() {
 
-		foreach($this->js AS $j)
-				echo '<script type="text/javascript" src="'.$j['path'].$j['file'].'"></script><!-- '.$j['name'].' -->
-';
+		foreach($this->js AS $j) {
+            // NOTICE fix
+            if (!isset($j['path'])) $j['path'] = '';
+            echo '<script type="text/javascript" src="'.$j['path'].$j['file'].'"></script><!-- '.$j['name'].' -->';
+        }
 	}
 	// @todo fix path handling
 	public function getCssOutput() {
@@ -74,15 +85,16 @@ class Html extends AbstractHtml {
 	 */
 	public function img($file, $opts = array(), $path = NULL) {
 
-		$opt = $this->_parseOptions($opts);
-		echo '<img src="'.$this->getContext()->getProperty('THEME_URL').'img/'.$file.'" '.$opt.' />';
+		if (!array_key_exists('alt', $opts)) $opts['alt'] = '';
+        $opt = $this->_parseOptions($opts);
+		echo '<img src="'.$this->context->getProperty('THEME_URL').'img/'.$file.'" '.$opt.' />';
 	}
 	/**
 	* TODO
 	*/
 	public function getUrl($s = '') {
 		if (strlen($s) > 0 ) $s .= '/';
-		return $this->getContext()->getProperty('WEBROOT_URL').$s;
+		return $this->context->getProperty('WEBROOT_URL').$s;
 	}
 	public function url($s) {
 		echo $this->getUrl($s);
@@ -96,7 +108,7 @@ class Html extends AbstractHtml {
 	 */
 	public function getThemeUrl($s = '') {
 		//if (strlen($s) > 0 ) $s .= '/';
-		return $this->getContext()->getProperty('THEME_URL').$s;
+		return $this->context->getProperty('THEME_URL').$s;
 	}
 	public function themeUrl($s = '') {
 		echo $this->getThemeUrl($s);
@@ -109,7 +121,7 @@ class Html extends AbstractHtml {
 		echo $this->getDefaultThemeUrl($s);
 	}
 	public function getPewResource($s) {
-		return $this->getContext()->getProperty('WEBROOT_URL').'pew/'.$s;
+		return $this->context->getProperty('WEBROOT_URL').'pew/'.$s;
 	}
 	public function pewResource($s) {
 		echo $this->getPewResource($s);
@@ -128,7 +140,7 @@ class Html extends AbstractHtml {
 		if (!$layout instanceof TableLayout) throw new \Exception("layout must implement TableLayout interface");
 		$layout->setTableModel($collection);
 
-		echo '<table class="data" border="0" title="'.$collection->getCollectionType().'">';
+		echo '<table class="data" border="" data-controller="'.$this->dispatcher->getClass().'">';
 		echo '<tr>';
 
 		$head = $layout->getTableHeaders();
@@ -155,6 +167,37 @@ class Html extends AbstractHtml {
 		}
 		echo '</table>';
 	}
+	
+	public function errorBox($error) {
+		if ($error != '') {
+			echo '<div class="pewError">'.$error.'</div>';
+		}
+	}
+	
+	public function errorList(array $items) {
+		echo '<ul class="errorList">'."\n";
+		foreach($items AS $err) {
+			echo '<li>'.$err.'</li>'."\n";
+		}
+		echo '</ul>';
+	}
+
+	public function warningList(array $items) {
+		echo '<ul class="warningList">'."\n";
+		foreach($items AS $err) {
+			echo '<li>'.$err.'</li>'."\n";
+		}
+		echo '</ul>';
+	}
+
+	public function infoList(array $items) {
+		echo '<ul class="infoList">'."\n";
+		foreach($items AS $err) {
+			echo '<li>'.$err.'</li>'."\n";
+		}
+		echo '</ul>';
+	}
+
 
 
 }

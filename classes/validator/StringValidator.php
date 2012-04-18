@@ -1,6 +1,7 @@
 <?php
-require_once('validator/_validator.php');
-class stringValidator extends _validator {
+namespace pew\validator;
+
+class StringValidator extends AbstractValidator {
 
 	// TODO implement $notNull
 	public static function validate($v, &$res, $notNull, &$msg) {

@@ -1,6 +1,9 @@
 <?php
-require_once('_html.php');
-class form extends _html {
+namespace pew\form;
+use pew\html;
+use pew;
+
+class Form extends html\Html {
    
 	protected $method;
 	protected $action;
@@ -8,12 +11,23 @@ class form extends _html {
 	protected $format;
 	
 	protected $data = array();
+	
+	protected $injector;
+	protected $dispatcher;
+	
+	protected $formId;
 
-	function __construct($model, $action = null, $method = "POST", $format = null) {
+	function __construct(pew\Context $context, pew\Injector $injector, pew\Dispatcher $dispatcher) {
+		$this->dispatcher = $dispatcher;
+		$this->injector = $injector;
+		$this->context = $context;
+	}
+
+	function prepare($model, $action = null, $method = "POST", $format = null) {
 		
 		$this->model = $model;
-	   if (!is_object($this->model) OR !is_subclass_of($this->model, '_entity')) 
-			throw new Exception(get_class($this).': model has to be an object');   
+			// 	   if (!is_object($this->model) OR !is_subclass_of($this->model, '_entity')) 
+			// throw new \Exception(get_class($this).': model has to be an object');   
 		
 		$this->method = $method;
 		$this->action = $action;
@@ -24,24 +38,30 @@ class form extends _html {
 		
 	}
    
+	public function setId($id) {
+		$this->formId = $id;
+	}
+
 	public function begin() {
 
 		if ($this->action == null) {
 			$format = ($this->format != null) ? $this->format : 'tpl';
-			$this->action = $this->getContext()->requestModule('pew')->getPewURL(null, null, $format);
+			$this->action = $this->dispatcher->generateUrl(null, null, $format);
 		}
+
 
 		// TODO ajax should be enabled elsewhere
 		// enable ajax for all form
 		$this->data['form']['class'][] = 'ajax';
 		
 		// TODO find a better id
-		$pew = $this->getContext()->requestModule('pew');
-		$formId = $pew->getController().ucfirst($pew->getAction());
+		//$pew = $this->context->requestModule('pew');
+		//$formId = $pew->getController().ucfirst($pew->getAction());
 		
 		// form header
 		// TODO nicer
-		echo '<form id="'.$formId.'" method="'.$this->method.'" action="'.$this->action.'" '.$this->_parseOptions($this->data['form']).'>';
+		
+		echo '<form id="'.$this->formId.'" method="'.$this->method.'" action="'.$this->action.'" '.$this->_parseOptions($this->data['form']).'>';
 		echo '<input name="submit" value="1" type="hidden" />';
 		echo '<input name="id" value="'.$this->model->getId().'" type="hidden" />';
 		echo '<ul>';   	
@@ -71,7 +91,7 @@ class form extends _html {
 	   
 		if ($layout == null) $layout = $model;
 	
-		if (!$layout instanceof _iFormLayout) throw new Exception('layout must implement _iFormLayout interface');
+		//if (!$layout instanceof _iFormLayout) throw new \Exception('layout must implement _iFormLayout interface');
 		$layout->setFormModel($model);
 
 		if ($groups == null)
@@ -79,13 +99,12 @@ class form extends _html {
 
 		foreach($groups AS $g) {
 			$elements = $layout->getFormElements($g);
-			
+
 			if (is_array($elements)) {
 				$layout->groupHeader($g);
 				foreach($elements AS $e) {
-				   if (!is_subclass_of($e, '_formInput')) throw new Exception('form elements must inherit from _formInput ('.json_encode($e).')');
+				   // if (!is_subclass_of($e, '_formInput')) throw new \Exception('form elements must inherit from _formInput ('.json_encode($e).')');
 					$e->setModel($this, $model);
-					Registry::getInstance()->log(get_class($this).'->render(): try to render '.get_class($e));
 					$e->render();
 				}
 				$layout->groupFooter($g);

@@ -2,19 +2,15 @@
 namespace pew\html;
 use pew;
 
-class Toolbar extends pew\AbstractCollection {
+class Toolbar {
+
+	private $dispatcher;
 	
-	private $controller;
-	
-	public function __construct($controller) {
+	public function __construct(pew\Dispatcher $dispatcher) {
 		
-		$this->controller = $controller;
-		$this->type = $controller;
+		$this->dispatcher = $dispatcher;
 	}
-	public function __deconstruct() {
-		
-	}
-	
+
 	public function add($item) {
 		
 		//if (is_a($item, '_widget')) {
@@ -30,9 +26,9 @@ class Toolbar extends pew\AbstractCollection {
 			$this->add($i);
 		}
 	}	
-	public function render() {
+	public function render($model = null) {
 		
-		echo '<ul id="tb'.ucfirst($this->controller).'" class="toolbar" title="'.$this->controller.'">';
+		echo '<ul id="tb'.ucfirst($this->dispatcher->getClass()).'" class="toolbar" data-controller="'.$this->dispatcher->getClass().'">';
 		foreach($this->bag AS $item) {
 			$item->render();
 		}

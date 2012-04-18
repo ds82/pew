@@ -3,9 +3,11 @@
  * undocumented 
  *
  * @author Sebastian Proksch
+ * @author Dennis Sänger
  */
 namespace pew;
-use pew\exceptions;
+use InvalidArgumentException;
+use \ReflectionClass;
 
 class Injector {
 
@@ -30,8 +32,8 @@ class Injector {
 	}
 
 	public function bindInstance($interface, $instance) {
-		if(!is_string($interface)) throw new \InvalidArgumentException('interface is not a string');
-		if(!($instance instanceof $interface)) throw new \InvalidArgumentException('instance no instance of interface');
+		if(!is_string($interface)) throw new InvalidArgumentException('interface is not a string');
+		if(!($instance instanceof $interface)) throw new InvalidArgumentException('instance no instance of interface');
 
 		$this->instances[$interface] = $instance;
 	}
@@ -63,10 +65,20 @@ class Injector {
 
 	private function instantiateAndRegister($binding) {
 
+		try {
+			$reflection = new ReflectionClass($binding);
+		} catch (ReflectionException $e) {
+			echo 'ReflectionException: '.$e->getMessage()."\n";
+			echo 'include path: '.get_include_path()."\n";
+			debug_print_backtrace();
+			exit;
+		}
 
-		$reflection = new \ReflectionClass($binding);
+		if (!$reflection->isInstantiable()) {
+			throw new InvalidArgumentException('Unable to instantiate class ' . $binding);
+		}
+
 		$deps = $this->createDependencies($reflection);
-
 		if (count($deps) > 0)
 			$newInstance = $reflection->newInstanceArgs($deps);
 		else
@@ -74,7 +86,7 @@ class Injector {
 
 		// catch errors, made earlier on binding wrong types together
 		if(!($newInstance instanceof $binding))
-			throw new \InvalidArgumentException("type mismatch: newInstance is no instance of binding");
+			throw new InvalidArgumentException("type mismatch: newInstance is no instance of binding");
 
 		if(in_array($binding, $this->singletons)) {
 			$this->instances[$binding] = $newInstance;
@@ -82,13 +94,14 @@ class Injector {
 		return $newInstance;
 	}
 
-	private function createDependencies(\ReflectionClass $reflection) {
+	private function createDependencies(ReflectionClass $reflection) {
 		$deps = array();
 
 		$constructor = $reflection->getConstructor();
-		if($constructor != null) {
+
+        if($constructor != null) {
 			foreach($constructor->getParameters() as $param) {
-				if (!$param->getClass()) continue;
+                if (!$param->getClass()) continue;
 				$depClass = $param->getClass()->getName();
 				$deps[] = $this->getInstance($depClass);
 			}
@@ -96,5 +109,12 @@ class Injector {
 
 		return $deps;
 	}
+	
+	// for debugging purpose
+	public function getSingeltons() {
+		return $this->singletons;
+	}
+	
+	
 }
 ?>

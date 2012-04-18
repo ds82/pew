@@ -1,29 +1,46 @@
 <?php
-require_once('filter/paginationFilter.php');
+namespace pew\filter;
 
-class liveSearchFilter extends paginationFilter {
+use pew\Item;
+
+class LiveSearchFilter extends PaginationFilter {
 
 	private $search = "";
-	private $check = true;
-	
-	public function __construct($search = null, $start = null, $num = null) {
+
+	public function __construct() {
+		// smelly :/
+        $this->prepare(null);
+	}
+
+	public function prepare($search = null) {
 
 		$search == null && $search = trim(strtolower($_REQUEST['search']));
 		strlen($search) > 0 && $this->search = $search;
 
-		parent::__construct($start, $num);
+		// remove unwanted characters form search string
+		$this->search = preg_replace('/[%^$]/', '', $this->search);
+
 	}
 
-	public function check($item) {
+	public function check(Item $item) {
 
-		// check the search first, then call the parent check
-		// the counter increases if the parent check is called, thus it should only
-		// be called if the search string matched
-		if ($this->check && 0 == preg_match('/.*'.$this->search.'.*/', $item->toString())) return false;
+		if (preg_match('/\*/', $this->search) > 0) {
+			// replace * with .* to make a regexp
+			$searchExpr = preg_replace('/\*/', '.*', $this->search);
+			$searchExpr = '/^'.$searchExpr.'$/';
+		} else {
+			$searchExpr = '/.*'.$this->search.'.*/';
+		}
 		
-		$result = parent::check($item);
-		
-		return $result;
+		$toBeSearched = $item->toString();
+		$itemMatchesSearch = preg_match($searchExpr, $toBeSearched);
+
+		if ($itemMatchesSearch) {
+			// the counter increases if the parent check is called, thus it should only
+			// be called if the search string matched
+			return parent::check($item);
+		} else
+			return false;
 	}
 }
 

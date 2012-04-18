@@ -1,17 +1,22 @@
 <?php
-require_once('_filter.php');
+namespace pew\filter;
+
 /**
  * abstract implementation of a filter. write a custom filters for pagination and stuff
  * @author dennis
  *
  */
-abstract class _sqlFilter extends _filter {
+abstract class SqlFilter extends BasicFilter {
 
 	protected $sqlFilter = false;
 	
 	public function enableSqlFilter($e) {
 		$this->sqlFilter = $e;
 	}
+
+    public function isSqlFilter() {
+        return $this->sqlFilter;
+    }
 	
 	public abstract function getSqlLimit();
 	public abstract function getSqlWhere();
